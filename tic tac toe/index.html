@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic-Tac-Toe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      text-align: center;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+    }
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #000;
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: red;
+      cursor: pointer;
+    }
+    .cell.taken {
+      pointer-events: none;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+    .restart-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tic-Tac-Toe</h1>
+    <div class="board" id="board"></div>
+    <p class="message" id="message"></p>
+    <button class="restart-button" id="restartButton">Restart Game</button>
+  </div>
+  <script>
+    const board = document.getElementById('board');
+    const message = document.getElementById('message');
+    const restartButton = document.getElementById('restartButton');
+    let cells = [];
+    let currentPlayer = 'X';
+    let gameActive = true;
+
+    // Initialize board
+    function initBoard() {
+      board.innerHTML = '';
+      cells = [];
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.addEventListener('click', handleCellClick);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+      message.textContent = "Player X's Turn";
+      gameActive = true;
+      currentPlayer = 'X';
+    }
+
+    // Handle cell click
+    function handleCellClick(event) {
+      const cell = event.target;
+      if (!gameActive || cell.textContent !== '') return;
+      cell.textContent = currentPlayer;
+      cell.classList.add('taken');
+      if (checkWin(currentPlayer)) {
+        message.textContent = `Player ${currentPlayer} Wins!`;
+        gameActive = false;
+      } else if (cells.every(cell => cell.textContent !== '')) {
+        message.textContent = 'Draw!';
+        gameActive = false;
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        message.textContent = `Player ${currentPlayer}'s Turn`;
+        if (currentPlayer === 'O') {
+          setTimeout(computerMove, 500);
+        }
+      }
+    }
+
+    // Computer move
+    function computerMove() {
+      const emptyCells = cells.filter(cell => cell.textContent === '');
+      if (emptyCells.length === 0) return;
+      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      randomCell.textContent = 'O';
+      randomCell.classList.add('taken');
+      if (checkWin('O')) {
+        message.textContent = 'Player O Wins!';
+        gameActive = false;
+      } else if (cells.every(cell => cell.textContent !== '')) {
+        message.textContent = 'Draw!';
+        gameActive = false;
+      } else {
+        currentPlayer = 'X';
+        message.textContent = `Player X's Turn`;
+      }
+    }
+
+    // Check win condition
+    function checkWin(player) {
+      const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+      ];
+      return winPatterns.some(pattern =>
+        pattern.every(index => cells[index].textContent === player)
+      );
+    }
+
+    // Restart game
+    restartButton.addEventListener('click', initBoard);
+
+    initBoard();
+  </script>
+</body>
+</html>
